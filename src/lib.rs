@@ -1,17 +1,22 @@
 mod codegen;
 
+#[cfg(test)]
+mod test;
+
 use json::{object::Object, Array, JsonValue};
 use std::collections::HashMap;
 
+pub use codegen::*;
 pub use json;
 
+#[derive(Debug)]
 pub enum Number {
-    Int(i64),
-    UInt(i64),
-    Float(f64),
+    Int,
+    UInt,
+    Float,
 }
 
-#[derive(Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub enum JsonType {
     Null,
     Number,
@@ -26,25 +31,27 @@ pub trait TypeAccumulator {
     fn end(&mut self) -> String;
 
     fn number(&mut self, key: &str, number: Number) -> Result<(), Error>;
-    fn boolean(&mut self, key: &str, b: bool) -> Result<(), Error>;
-    fn string(&mut self, key: &str, s: &str) -> Result<(), Error>;
+    fn boolean(&mut self, key: &str) -> Result<(), Error>;
+    fn string(&mut self, key: &str) -> Result<(), Error>;
     fn unknown(&mut self, key: &str) -> Result<(), Error>;
     fn array(&mut self, key: &str, ty: JsonType) -> Result<(), Error>;
     fn object(&mut self, key: &str, object_name: &str) -> Result<(), Error>;
 
-    fn push_object_type(&mut self, object_name: &str) -> Result<String, Error>;
+    fn push_object_type(&mut self, object_name: &str) -> Result<(), Error>;
     fn pop_object_type(&mut self) -> Result<(), Error>;
 
     fn prefered_object_name(&self) -> String;
 }
 
+#[derive(Debug, PartialEq, Eq)]
 pub enum Error {
     /// Got a parse error from the [`json`] crate.
     Parse(json::Error),
     /// All inputs should begin as an object `{ ... }`.
     ExpectedObject,
-    /// A [`json`] number does not fit within a [`f64`], [`u64`], or [`i64`].
-    NumberTooLarge,
+    /// A [`json`] number does not fit within a [`f64`] or [`i64`].
+    /// This error does not seem to work.
+    BadNumber,
     /// A type is not supported by the choosen language.
     TypeNotSupported,
     /// An array cannot contain multiple elements of differing types.
@@ -79,7 +86,7 @@ impl ObjectTypeTable {
 /// Generate language bindings using a provided accumulator.
 /// See the [`codegen`] for supported accumulators or build your own.
 pub fn generate(
-    accumulator: &mut impl TypeAccumulator,
+    mut accumulator: impl TypeAccumulator,
     name: &str,
     json_str: &str,
 ) -> Result<String, Error> {
@@ -88,7 +95,11 @@ pub fn generate(
     let mut obj_table = ObjectTypeTable::default();
 
     match val {
-        JsonValue::Object(val) => generate_object(accumulator, &mut obj_table, name, &val)?,
+        JsonValue::Object(val) => {
+            accumulator.push_object_type(name)?;
+            generate_object(&mut accumulator, &mut obj_table, &val)?;
+            accumulator.pop_object_type()?;
+        }
         _ => Err(Error::ExpectedObject)?,
     };
 
@@ -98,52 +109,47 @@ pub fn generate(
 fn generate_object(
     accumulator: &mut impl TypeAccumulator,
     obj_table: &mut ObjectTypeTable,
-    name: &str,
     val: &Object,
 ) -> Result<(), Error> {
-    accumulator.push_object_type(name)?;
     let res = val.iter().try_for_each(|(name, val)| match val {
         JsonValue::Null => accumulator.unknown(name),
-        JsonValue::Short(s) => accumulator.string(name, s.as_str()),
-        JsonValue::String(s) => accumulator.string(name, s.as_str()),
+        JsonValue::Short(_) | JsonValue::String(_) => accumulator.string(name),
         JsonValue::Number(n) => {
             let n = *n;
-            let number = if let Ok(dec) = n.try_into() {
-                Number::Float(dec)
-            } else if let Ok(int) = n.try_into() {
-                Number::Int(int)
-            } else if let Ok(uint) = n.try_into() {
-                Number::UInt(uint)
+            let number = if i64::try_from(n).is_ok() {
+                Number::Int
+            } else if f64::try_from(n).is_ok() {
+                Number::Float
             } else {
-                Err(Error::ExpectedObject)?
+                Err(Error::BadNumber)?
             };
             accumulator.number(name, number)
         }
-        JsonValue::Boolean(b) => accumulator.boolean(name, *b),
+        JsonValue::Boolean(_) => accumulator.boolean(name),
         JsonValue::Array(a) => {
-            let ty = get_array_element_type(accumulator, obj_table, a)?;
+            let ty = get_array_element_type(accumulator, obj_table, name, a)?;
             accumulator.array(name, ty)
         }
         JsonValue::Object(o) => {
-            let object_name = get_object_type(accumulator, obj_table, o)?;
+            let object_name = get_object_type(accumulator, obj_table, name, o)?;
             accumulator.object(name, &object_name)
         }
     });
-    accumulator.pop_object_type()?;
     res
 }
 
 fn get_array_element_type(
     accumulator: &mut impl TypeAccumulator,
     obj_table: &mut ObjectTypeTable,
+    key: &str,
     val: &Array,
 ) -> Result<JsonType, Error> {
     let Some(overall_val) =  val.get(0) else {
         return Ok(JsonType::Null);
     };
-    let overall_type = value_into_json_type(accumulator, obj_table, overall_val)?;
+    let overall_type = value_into_json_type(accumulator, obj_table, key, overall_val)?;
     val.iter().try_for_each(|val| {
-        if overall_type == value_into_json_type(accumulator, obj_table, val)? {
+        if overall_type == value_into_json_type(accumulator, obj_table, key, val)? {
             Ok(())
         } else {
             Err(Error::DifferingArrayType)
@@ -155,14 +161,16 @@ fn get_array_element_type(
 fn get_object_type(
     accumulator: &mut impl TypeAccumulator,
     obj_table: &mut ObjectTypeTable,
+    key: &str,
     val: &Object,
 ) -> Result<String, Error> {
-    let object_fields = object_into_fields(accumulator, obj_table, val)?;
+    let object_fields = object_into_fields(accumulator, obj_table, key, val)?;
     if let Some(name) = obj_table.get_object_name(object_fields.clone()) {
         Ok(name)
     } else {
         let name = accumulator.prefered_object_name() + &obj_table.count().to_string();
         accumulator.push_object_type(&name)?;
+        generate_object(accumulator, obj_table, val)?;
         accumulator.pop_object_type()?;
         obj_table.insert(&name, object_fields);
         Ok(name)
@@ -173,6 +181,7 @@ fn get_object_type(
 fn value_into_json_type(
     accumulator: &mut impl TypeAccumulator,
     obj_table: &mut ObjectTypeTable,
+    key: &str,
     val: &JsonValue,
 ) -> Result<JsonType, Error> {
     Ok(match val {
@@ -180,23 +189,27 @@ fn value_into_json_type(
         JsonValue::Short(_) | JsonValue::String(_) => JsonType::String,
         JsonValue::Number(_) => JsonType::Number,
         JsonValue::Boolean(_) => JsonType::Boolean,
-        JsonValue::Object(o) => JsonType::Object(get_object_type(accumulator, obj_table, o)?),
-        JsonValue::Array(a) => {
-            JsonType::Array(Box::new(get_array_element_type(accumulator, obj_table, a)?))
-        }
+        JsonValue::Object(o) => JsonType::Object(get_object_type(accumulator, obj_table, key, o)?),
+        JsonValue::Array(a) => JsonType::Array(Box::new(get_array_element_type(
+            accumulator,
+            obj_table,
+            key,
+            a,
+        )?)),
     })
 }
 
 fn object_into_fields(
     accumulator: &mut impl TypeAccumulator,
     obj_table: &mut ObjectTypeTable,
+    key_name: &str,
     obj: &Object,
 ) -> Result<Vec<(ObjectField, JsonType)>, Error> {
     obj.iter()
         .map(|(key, val)| {
             Ok((
                 key.to_owned(),
-                value_into_json_type(accumulator, obj_table, val)?,
+                value_into_json_type(accumulator, obj_table, key_name, val)?,
             ))
         })
         .collect::<Result<_, _>>()
