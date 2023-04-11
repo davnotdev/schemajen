@@ -21,11 +21,11 @@ let supported;
 })();
 
 submit.onclick = () => {
-  let selection = selection.value;
+  let selectionValue = selection.value;
   let typename = typenameBox.value;
-  if (supported.includes(selection)) {
+  if (supported.includes(selectionValue)) {
     let input = inputBox.value;
-    outputBox.innerText = generate_js(selection, typename, input);
+    outputBox.innerText = generate_js(selectionValue, typename, input);
   } else {
     outputBox.innerText = "Error: That accumulator does not exist.";
   }
