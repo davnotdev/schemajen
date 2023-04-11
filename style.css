@@ -1,0 +1,57 @@
+body {
+  background: #141613;
+  font-size: 3rem;
+  text-align: center;
+  color: #cbd6c7;
+  padding: 1rem;
+  font-family: monospace;
+  height: 90%;
+}
+
+html {
+  height: 100%;
+}
+
+#container {
+  display: flex;
+  flex-direction: column;
+  justify-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+#center-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 75%;
+  padding: 0;
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  #container {
+    flex-direction: row;
+  }
+}
+
+button,
+#accumulators {
+  border-radius: 5px;
+  font-size: 1.2rem;
+  font-family: monospace;
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+.textbox {
+  text-align: left;
+  color: #cbd6c7;
+  border-radius: 5px;
+  border: 1px #cbd6c7 solid;
+  background: #141613;
+  font-size: 0.8rem;
+  padding: 1rem;
+  margin: 1rem;
+  width: 30rem;
+}

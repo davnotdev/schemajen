@@ -3,6 +3,9 @@ mod codegen;
 #[cfg(test)]
 mod test;
 
+#[cfg(all(target_arch = "wasm32", target_vendor = "unknown", target_os = "unknown", target_env = ""))]
+mod wasm;
+
 use json::{object::Object, Array, JsonValue};
 use std::collections::HashMap;
 

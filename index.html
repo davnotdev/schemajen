@@ -1,12 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <title></title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href="css/style.css" rel="stylesheet">
-    </head>
-    <body>
-        Hello World!
-    </body>
+
+<head>
+    <title></title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="style.css" rel="stylesheet" />
+    <link rel="preload" href="/dist/schemajen-e1c0aef9bfbd891f_bg.wasm" as="fetch" type="application/wasm"
+        crossorigin="" />
+    <link rel="modulepreload" href="/dist/schemajen-e1c0aef9bfbd891f.js" />
+</head>
+
+<body>
+    <div>Schemajen</div>
+
+    <select id="accumulators">
+        <option value="mock">Mock</option>
+    </select>
+    <div id="center-container">
+        <div id="container">
+            <textarea id="in" class="textbox" placeholder="JSON goes here."></textarea>
+            <span id="out" class="textbox">Output goes here.</span>
+        </div>
+    </div>
+    <button>Jenerate</button>
+    <script>
+        WebAssembly.instantiateStreaming(
+            fetch("/schemajen.wasm"),
+            {}
+        ).then((res) => { 
+            console.log(res);
+        });
+    </script>
+</body>
+
 </html>
