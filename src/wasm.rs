@@ -20,7 +20,7 @@ pub fn generate_js(accumulator: &str, name: &str, str: &str) -> JsValue {
     );
 
     if let Err(e) = res {
-        return format!("Got error: {:?}", e).into();
+        return format!("Error: {:?}", e).into();
     }
     res.unwrap().into()
 }
