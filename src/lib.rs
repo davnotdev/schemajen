@@ -3,29 +3,32 @@ mod codegen;
 #[cfg(test)]
 mod test;
 
-#[cfg(all(target_arch = "wasm32", target_vendor = "unknown", target_os = "unknown", target_env = ""))]
+#[cfg(all(
+    target_arch = "wasm32",
+    target_vendor = "unknown",
+    target_os = "unknown",
+    target_env = ""
+))]
 mod wasm;
 
-use json::{object::Object, Array, JsonValue};
+use json::{number::Number as JNumber, object::Object, Array, JsonValue};
 use std::collections::HashMap;
 
 pub use codegen::*;
 pub use json;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub enum Number {
     Int,
-    UInt,
     Float,
 }
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub enum JsonType {
     Null,
-    Number,
+    Number(Number),
     Boolean,
     String,
-    Unknown,
     Object(String),
     Array(Box<JsonType>),
 }
@@ -89,7 +92,7 @@ impl ObjectTypeTable {
 /// Generate language bindings using a provided accumulator.
 /// See the [`codegen`] for supported accumulators or build your own.
 pub fn generate(
-    mut accumulator: impl TypeAccumulator,
+    accumulator: &mut Box<dyn TypeAccumulator>,
     name: &str,
     json_str: &str,
 ) -> Result<String, Error> {
@@ -100,7 +103,7 @@ pub fn generate(
     match val {
         JsonValue::Object(val) => {
             accumulator.push_object_type(name)?;
-            generate_object(&mut accumulator, &mut obj_table, &val)?;
+            generate_object(accumulator, &mut obj_table, &val)?;
             accumulator.pop_object_type()?;
         }
         _ => Err(Error::ExpectedObject)?,
@@ -110,7 +113,7 @@ pub fn generate(
 }
 
 fn generate_object(
-    accumulator: &mut impl TypeAccumulator,
+    accumulator: &mut Box<dyn TypeAccumulator>,
     obj_table: &mut ObjectTypeTable,
     val: &Object,
 ) -> Result<(), Error> {
@@ -118,14 +121,7 @@ fn generate_object(
         JsonValue::Null => accumulator.unknown(name),
         JsonValue::Short(_) | JsonValue::String(_) => accumulator.string(name),
         JsonValue::Number(n) => {
-            let n = *n;
-            let number = if i64::try_from(n).is_ok() {
-                Number::Int
-            } else if f64::try_from(n).is_ok() {
-                Number::Float
-            } else {
-                Err(Error::BadNumber)?
-            };
+            let number = value_into_number(n)?;
             accumulator.number(name, number)
         }
         JsonValue::Boolean(_) => accumulator.boolean(name),
@@ -142,7 +138,7 @@ fn generate_object(
 }
 
 fn get_array_element_type(
-    accumulator: &mut impl TypeAccumulator,
+    accumulator: &mut Box<dyn TypeAccumulator>,
     obj_table: &mut ObjectTypeTable,
     key: &str,
     val: &Array,
@@ -161,8 +157,19 @@ fn get_array_element_type(
     Ok(overall_type)
 }
 
+fn value_into_number(n: &JNumber) -> Result<Number, Error> {
+    let n = *n;
+    if i64::try_from(n).is_ok() {
+        Ok(Number::Int)
+    } else if f64::try_from(n).is_ok() {
+        Ok(Number::Float)
+    } else {
+        Err(Error::BadNumber)
+    }
+}
+
 fn get_object_type(
-    accumulator: &mut impl TypeAccumulator,
+    accumulator: &mut Box<dyn TypeAccumulator>,
     obj_table: &mut ObjectTypeTable,
     key: &str,
     val: &Object,
@@ -182,7 +189,7 @@ fn get_object_type(
 
 /// Note that this calls [`generate_object`] if the type is an object that has not yet been generated.
 fn value_into_json_type(
-    accumulator: &mut impl TypeAccumulator,
+    accumulator: &mut Box<dyn TypeAccumulator>,
     obj_table: &mut ObjectTypeTable,
     key: &str,
     val: &JsonValue,
@@ -190,7 +197,7 @@ fn value_into_json_type(
     Ok(match val {
         JsonValue::Null => JsonType::Null,
         JsonValue::Short(_) | JsonValue::String(_) => JsonType::String,
-        JsonValue::Number(_) => JsonType::Number,
+        JsonValue::Number(n) => JsonType::Number(value_into_number(n)?),
         JsonValue::Boolean(_) => JsonType::Boolean,
         JsonValue::Object(o) => JsonType::Object(get_object_type(accumulator, obj_table, key, o)?),
         JsonValue::Array(a) => JsonType::Array(Box::new(get_array_element_type(
@@ -203,7 +210,7 @@ fn value_into_json_type(
 }
 
 fn object_into_fields(
-    accumulator: &mut impl TypeAccumulator,
+    accumulator: &mut Box<dyn TypeAccumulator>,
     obj_table: &mut ObjectTypeTable,
     key_name: &str,
     obj: &Object,

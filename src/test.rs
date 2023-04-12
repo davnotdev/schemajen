@@ -14,7 +14,12 @@ fn test_mock_simple() {
     }
 "#;
     assert_eq!(
-        generate(MockAccumulator::begin(), "MyType", json).unwrap(),
+        generate(
+            &mut accumulator_choose_with_str("mock").unwrap(),
+            "MyType",
+            json
+        )
+        .unwrap(),
         r#"ty:MyType
 num:0:Int
 bool:1
@@ -63,7 +68,12 @@ fn test_mock_nested() {
     }
 "#;
     assert_eq!(
-        generate(MockAccumulator::begin(), "MyType", json).unwrap(),
+        generate(
+            &mut accumulator_choose_with_str("mock").unwrap(),
+            "MyType",
+            json
+        )
+        .unwrap(),
         r#"ty:MyType
 ty:_0
 num:a:Float
@@ -92,13 +102,21 @@ fn test_mock_error() {
     { "a": [{ "a": "10" }, { "a": "10", "b": 5 }] }
 "#;
     assert_eq!(
-        generate(MockAccumulator::begin(), "MyType", case),
+        generate(
+            &mut accumulator_choose_with_str("mock").unwrap(),
+            "MyType",
+            case
+        ),
         Err(Error::DifferingArrayType)
     );
 
     let case = r#"0"#;
     assert_eq!(
-        generate(MockAccumulator::begin(), "MyType", case),
+        generate(
+            &mut accumulator_choose_with_str("mock").unwrap(),
+            "MyType",
+            case
+        ),
         Err(Error::ExpectedObject)
     );
 }

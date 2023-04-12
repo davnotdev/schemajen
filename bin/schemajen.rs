@@ -4,9 +4,9 @@ fn main() {
     let args = std::env::args().collect::<Vec<_>>();
     let bin_name = env!("CARGO_BIN_NAME");
 
-    let support_str = ["mock"]
-        .into_iter()
-        .fold(String::new(), |total, s| total + "\t" + s);
+    let support_str = ACCUMULATOR_SUPPORT_LIST
+        .iter()
+        .fold(String::new(), |total, s| total + "\t" + s + "\n");
 
     if args.iter().any(|s| s == "-h" || s == "--help") {
         eprintln!(
@@ -20,8 +20,7 @@ View this very message with `{bin_name} --help` or `{bin_name} -h`.
 
 This version was compiled with the following accumulators:
 
-{}
-",
+{}",
             env!("CARGO_PKG_VERSION"),
             support_str
         );
@@ -50,13 +49,11 @@ This version was compiled with the following accumulators:
     };
     let file = file.unwrap();
 
-    let res = match accumulator.as_str() {
-        "mock" => generate(MockAccumulator::begin(), typename, &file),
-        _ => {
+    let Some(mut accumulator) = accumulator_choose_with_str(accumulator) else {
             eprintln!("That accumulator does not exist");
             return;
-        }
     };
+    let res = generate(&mut accumulator, typename, &file);
 
     if let Err(e) = &res {
         eprintln!("Codegen failed with: {:?}", e);
