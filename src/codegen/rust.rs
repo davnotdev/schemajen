@@ -93,7 +93,10 @@ impl TypeAccumulator for RustAccumulator {
     fn push_object_type(&mut self, object_name: &str) -> Result<(), Error> {
         self.struct_stack.push(String::new());
         let acc = self.get_current();
-        *acc += &format!("#[derive(Serialize, Deserialize)]\npub struct {} {{\n", object_name);
+        *acc += &format!(
+            "#[derive(Serialize, Deserialize)]\npub struct {} {{\n",
+            object_name
+        );
         Ok(())
     }
 

@@ -1,4 +1,31 @@
-mod codegen;
+//! # SchemaJen
+//!
+//!
+//! Auto-magically infer language bindings given a JSON schema.
+//!
+//! If you are a user and not a contributor, go back to the [Github page](https://github.com/davnotdev/schemajen) as this is *probably* not for you.
+//!
+//! ## Usage 
+//!
+//! ```
+//! use schemajen::*;
+//!
+//! //  See [`ACCUMULATOR_SUPPORT_LIST`] for string options.
+//! //  let mut accumulator = accumulator_choose_with_str("rust");
+//!
+//! let mut accumulator = Box::new(RustAccumulator::begin());
+//! let res = generate(&mut accumulator, "MyType", r#"{"a": 10}"#);
+//! res.unwrap();
+//! eprintln!("{}", res);
+//!
+//! ```
+//!
+//! ## Contributing
+//!
+//! All code generators (aka accumulators) are found in [`codegen`].
+//!
+
+pub mod codegen;
 
 #[cfg(test)]
 mod test;

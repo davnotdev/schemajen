@@ -17,11 +17,7 @@ pub fn generate_js(accumulator: &str, name: &str, str: &str) -> JsValue {
     let Some(mut accumulator) = accumulator_choose_with_str(accumulator) else {
         return format!("Error: That accumulator is not supported here.").into();
     };
-    let res = generate(
-        &mut accumulator,
-        name,
-        str,
-    );
+    let res = generate(&mut accumulator, name, str);
 
     if let Err(e) = res {
         return format!("Error: {:?}", e).into();
