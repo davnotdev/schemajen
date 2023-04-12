@@ -9,7 +9,7 @@ Given a JSON request, response, or literally anything, SchemaJen can infer worki
 
 ## Try it now!
 
-You can try the web version of SchemaJen [here](https://davnotdev.github.io/schemajen);
+You can try the web version of SchemaJen [here](https://davnotdev.github.io/schemajen).
 
 Alternatively, you can also install the CLI version of SchemaJen using cargo.
 
