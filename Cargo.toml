@@ -2,6 +2,10 @@
 name = "schemajen"
 version = "0.1.0"
 edition = "2021"
+description = "SchemaJen - Auto-magically infer language bindings given a JSON schema."
+repository = "https://github.com/davnotdev/schemajen"
+homepage = "https://github.com/davnotdev/schemajen"
+license = "AGPL-3.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
