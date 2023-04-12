@@ -57,6 +57,7 @@ This version was compiled with the following accumulators:
 
     if let Err(e) = &res {
         eprintln!("Codegen failed with: {:?}", e);
+        return;
     }
 
     println!("{}", res.unwrap());
