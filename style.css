@@ -44,6 +44,11 @@ button,
   padding-right: 2rem;
 }
 
+#typename {
+  font-family: monospace;
+  font-size: 1.2rem;
+}
+
 .textbox {
   text-align: left;
   color: #cbd6c7;

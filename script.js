@@ -11,11 +11,11 @@ let supported;
 
 (async () => {
   await init();
-  console.log(init, supported_accumulators(), generate_js);
   supported = JSON.parse(supported_accumulators());
   supported.forEach((accumulator) => {
     let option = document.createElement("option");
     option.value = accumulator;
+    option.innerText = accumulator;
     selection.appendChild(option);
   });
 })();
@@ -23,6 +23,11 @@ let supported;
 submit.onclick = () => {
   let selectionValue = selection.value;
   let typename = typenameBox.value;
+  if (typenameBox.value == "") {
+    outputBox.innerText = "Error: Typename not specified";
+    return;
+  }
+
   if (supported.includes(selectionValue)) {
     let input = inputBox.value;
     outputBox.innerText = generate_js(selectionValue, typename, input);
