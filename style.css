@@ -49,6 +49,10 @@ button,
   font-size: 1.2rem;
 }
 
+pre {
+    white-space: pre-wrap;
+}
+
 .textbox {
   text-align: left;
   color: #cbd6c7;
