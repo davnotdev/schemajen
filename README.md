@@ -7,6 +7,14 @@ This is especially true if your backend is written in a different language from 
 Schemajen is a tool that makes the process almost painless.
 Given a JSON request, response, or literally anything, SchemaJen can infer working language bindings.
 
+## Language Support
+
+- Rust
+- Typescript
+- Python 3.8+
+
+> Feel free to send in language requests or additional implementations!
+
 ## Try it now!
 
 You can try the web version of SchemaJen [here](https://davnotdev.github.io/schemajen).

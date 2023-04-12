@@ -6,24 +6,28 @@
 use super::*;
 
 mod mock;
+mod python;
 mod rust;
 mod typescript;
 
 /// Testing purposes only.
 pub use mock::MockAccumulator;
+/// Python 3.8+ support.
+pub use python::PythonAccumulator;
 /// Rust support using serde.
 pub use rust::RustAccumulator;
 /// Typescript support.
 pub use typescript::TypescriptAccumulator;
 
 /// The list of supported accumulators: `["typescript", "rust", "mock"]`.
-pub const ACCUMULATOR_SUPPORT_LIST: &[&str] = &["typescript", "rust", "mock"];
+pub const ACCUMULATOR_SUPPORT_LIST: &[&str] = &["typescript", "python", "rust", "mock"];
 
 /// Choose an accumulator from [`ACCUMULATOR_SUPPORT_LIST`]
 pub fn accumulator_choose_with_str(s: &str) -> Option<Box<dyn TypeAccumulator>> {
     Some(match s {
         "typescript" => Box::new(TypescriptAccumulator::begin()),
         "rust" => Box::new(RustAccumulator::begin()),
+        "python" => Box::new(PythonAccumulator::begin()),
         "mock" => Box::new(MockAccumulator::begin()),
         _ => None?,
     })
