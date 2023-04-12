@@ -12,6 +12,7 @@ Given a JSON request, response, or literally anything, SchemaJen can infer worki
 - Rust
 - Typescript
 - Python 3.8+
+- Java (via `java.io.Serializable`)
 
 > Feel free to send in language requests or additional implementations!
 
