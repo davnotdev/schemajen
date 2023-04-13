@@ -53,7 +53,7 @@ This version was compiled with the following accumulators:
             eprintln!("That accumulator does not exist");
             return;
     };
-    let res = generate(&mut accumulator, typename, &file);
+    let res = generate(accumulator.as_mut(), typename, &file);
 
     if let Err(e) = &res {
         eprintln!("Codegen failed with: {:?}", e);

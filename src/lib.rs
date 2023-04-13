@@ -5,7 +5,7 @@
 //!
 //! If you are a user and not a contributor, go back to the [Github page](https://github.com/davnotdev/schemajen) as this is *probably* not for you.
 //!
-//! ## Usage 
+//! ## Usage
 //!
 //! ```
 //! use schemajen::*;
@@ -14,9 +14,9 @@
 //! //  let mut accumulator = accumulator_choose_with_str("rust");
 //!
 //! let mut accumulator = Box::new(RustAccumulator::begin());
-//! let res = generate(&mut accumulator, "MyType", r#"{"a": 10}"#);
-//! res.unwrap();
-//! eprintln!("{:?}", res);
+//! let res = generate(accumulator.as_mut(), "MyType", r#"{"a": 10}"#);
+//! let res = res.unwrap();
+//! eprintln!("{}", res);
 //!
 //! ```
 //!
@@ -119,7 +119,7 @@ impl ObjectTypeTable {
 /// Generate language bindings using a provided accumulator.
 /// See the [`codegen`] for supported accumulators or build your own.
 pub fn generate(
-    accumulator: &mut Box<dyn TypeAccumulator>,
+    accumulator: &mut dyn TypeAccumulator,
     name: &str,
     json_str: &str,
 ) -> Result<String, Error> {
@@ -140,7 +140,7 @@ pub fn generate(
 }
 
 fn generate_object(
-    accumulator: &mut Box<dyn TypeAccumulator>,
+    accumulator: &mut dyn TypeAccumulator,
     obj_table: &mut ObjectTypeTable,
     val: &Object,
 ) -> Result<(), Error> {
@@ -165,7 +165,7 @@ fn generate_object(
 }
 
 fn get_array_element_type(
-    accumulator: &mut Box<dyn TypeAccumulator>,
+    accumulator: &mut dyn TypeAccumulator,
     obj_table: &mut ObjectTypeTable,
     key: &str,
     val: &Array,
@@ -196,7 +196,7 @@ fn value_into_number(n: &JNumber) -> Result<Number, Error> {
 }
 
 fn get_object_type(
-    accumulator: &mut Box<dyn TypeAccumulator>,
+    accumulator: &mut dyn TypeAccumulator,
     obj_table: &mut ObjectTypeTable,
     key: &str,
     val: &Object,
@@ -216,7 +216,7 @@ fn get_object_type(
 
 /// Note that this calls [`generate_object`] if the type is an object that has not yet been generated.
 fn value_into_json_type(
-    accumulator: &mut Box<dyn TypeAccumulator>,
+    accumulator: &mut dyn TypeAccumulator,
     obj_table: &mut ObjectTypeTable,
     key: &str,
     val: &JsonValue,
@@ -237,7 +237,7 @@ fn value_into_json_type(
 }
 
 fn object_into_fields(
-    accumulator: &mut Box<dyn TypeAccumulator>,
+    accumulator: &mut dyn TypeAccumulator,
     obj_table: &mut ObjectTypeTable,
     key_name: &str,
     obj: &Object,

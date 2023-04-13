@@ -15,14 +15,14 @@ impl TypescriptAccumulator {
         self.struct_stack.last_mut().unwrap()
     }
 
-    fn get_type(&mut self, ty: JsonType) -> String {
+    fn get_type(ty: JsonType) -> String {
         match ty {
             JsonType::Null => String::from("unknown"),
             JsonType::Number(_) => String::from("number"),
             JsonType::Boolean => String::from("boolean"),
             JsonType::String => String::from("string"),
             JsonType::Object(ty) => ty,
-            JsonType::Array(ty) => format!("{}[]", self.get_type(*ty)),
+            JsonType::Array(ty) => format!("{}[]", Self::get_type(*ty)),
         }
     }
 }
@@ -36,7 +36,7 @@ impl TypeAccumulator for TypescriptAccumulator {
         end_str
     }
 
-    fn number(&mut self, key: &str, number: Number) -> Result<(), Error> {
+    fn number(&mut self, key: &str, _: Number) -> Result<(), Error> {
         let acc = self.get_current();
         *acc += &format!("\t{}: number;\n", key);
         Ok(())
@@ -61,7 +61,7 @@ impl TypeAccumulator for TypescriptAccumulator {
     }
 
     fn array(&mut self, key: &str, ty: JsonType) -> Result<(), Error> {
-        let ty = self.get_type(ty);
+        let ty = Self::get_type(ty);
         let acc = self.get_current();
         *acc += &format!("\t{}: {}[];\n", key, ty);
         Ok(())

@@ -15,7 +15,7 @@ fn test_mock_simple() {
 "#;
     assert_eq!(
         generate(
-            &mut accumulator_choose_with_str("mock").unwrap(),
+            accumulator_choose_with_str("mock").unwrap().as_mut(),
             "MyType",
             json
         )
@@ -69,7 +69,7 @@ fn test_mock_nested() {
 "#;
     assert_eq!(
         generate(
-            &mut accumulator_choose_with_str("mock").unwrap(),
+            accumulator_choose_with_str("mock").unwrap().as_mut(),
             "MyType",
             json
         )
@@ -103,7 +103,7 @@ fn test_mock_error() {
 "#;
     assert_eq!(
         generate(
-            &mut accumulator_choose_with_str("mock").unwrap(),
+            accumulator_choose_with_str("mock").unwrap().as_mut(),
             "MyType",
             case
         ),
@@ -113,7 +113,7 @@ fn test_mock_error() {
     let case = r#"0"#;
     assert_eq!(
         generate(
-            &mut accumulator_choose_with_str("mock").unwrap(),
+            accumulator_choose_with_str("mock").unwrap().as_mut(),
             "MyType",
             case
         ),
