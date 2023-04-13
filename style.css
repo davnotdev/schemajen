@@ -51,6 +51,7 @@ button,
 
 pre {
     white-space: pre-wrap;
+    overflow-y: scroll;
 }
 
 .textbox {

@@ -1,6 +1,6 @@
 [package]
 name = "schemajen"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 description = "SchemaJen - Auto-magically infer language bindings given a JSON schema."
 repository = "https://github.com/davnotdev/schemajen"
