@@ -16,7 +16,7 @@
 //! let mut accumulator = Box::new(RustAccumulator::begin());
 //! let res = generate(&mut accumulator, "MyType", r#"{"a": 10}"#);
 //! res.unwrap();
-//! eprintln!("{}", res);
+//! eprintln!("{:?}", res);
 //!
 //! ```
 //!

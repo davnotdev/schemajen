@@ -5,12 +5,15 @@
 
 use super::*;
 
+mod dart;
 mod java;
 mod mock;
 mod python;
 mod rust;
 mod typescript;
 
+/// Dart support.
+pub use dart::DartAccumulator;
 /// Java Serializable support.
 pub use java::JavaAccumulator;
 /// Testing purposes only.
@@ -22,8 +25,9 @@ pub use rust::RustAccumulator;
 /// Typescript support.
 pub use typescript::TypescriptAccumulator;
 
-/// The list of supported accumulators: `["typescript", "rust", "mock"]`.
-pub const ACCUMULATOR_SUPPORT_LIST: &[&str] = &["typescript", "python", "rust", "java", "mock"];
+/// The list of supported accumulators: `["typescript", "python", "dart", "rust", "java", "mock"]`.
+pub const ACCUMULATOR_SUPPORT_LIST: &[&str] =
+    &["typescript", "python", "dart", "rust", "java", "mock"];
 
 /// Choose an accumulator from [`ACCUMULATOR_SUPPORT_LIST`]
 pub fn accumulator_choose_with_str(s: &str) -> Option<Box<dyn TypeAccumulator>> {
@@ -31,6 +35,7 @@ pub fn accumulator_choose_with_str(s: &str) -> Option<Box<dyn TypeAccumulator>> 
         "typescript" => Box::new(TypescriptAccumulator::begin()),
         "rust" => Box::new(RustAccumulator::begin()),
         "java" => Box::new(JavaAccumulator::begin()),
+        "dart" => Box::new(DartAccumulator::begin()),
         "python" => Box::new(PythonAccumulator::begin()),
         "mock" => Box::new(MockAccumulator::begin()),
         _ => None?,
