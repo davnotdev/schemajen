@@ -11,6 +11,7 @@ mod kotlin;
 mod mock;
 mod python;
 mod rust;
+mod swift;
 mod typescript;
 
 /// Dart support.
@@ -25,6 +26,8 @@ pub use mock::MockAccumulator;
 pub use python::PythonAccumulator;
 /// Rust support using serde.
 pub use rust::RustAccumulator;
+/// Swift support.
+pub use swift::SwiftAccumulator;
 /// Typescript support.
 pub use typescript::TypescriptAccumulator;
 
@@ -36,6 +39,7 @@ pub const ACCUMULATOR_SUPPORT_LIST: &[&str] = &[
     "rust",
     "java",
     "kotlin",
+    "swift",
     "mock",
 ];
 
@@ -48,6 +52,7 @@ pub fn accumulator_choose_with_str(s: &str) -> Option<Box<dyn TypeAccumulator>> 
         "dart" => Box::new(DartAccumulator::begin()),
         "kotlin" => Box::new(KotlinAccumulator::begin()),
         "python" => Box::new(PythonAccumulator::begin()),
+        "swift" => Box::new(SwiftAccumulator::begin()),
         "mock" => Box::new(MockAccumulator::begin()),
         _ => None?,
     })
