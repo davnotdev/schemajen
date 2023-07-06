@@ -90,13 +90,13 @@ impl TypeAccumulator for SwiftAccumulator {
     fn array(&mut self, key: &str, ty: JsonType) -> Result<(), Error> {
         let ty = self.get_type(ty);
         let acc = self.get_current();
-        *acc += &format!("\tvar {}: [{}],\n", key, ty);
+        *acc += &format!("\tvar {}: [{}]\n", key, ty);
         Ok(())
     }
 
     fn object(&mut self, key: &str, object_name: &str) -> Result<(), Error> {
         let acc = self.get_current();
-        *acc += &format!("\tvar {}: {},\n", key, object_name);
+        *acc += &format!("\tvar {}: {}\n", key, object_name);
         Ok(())
     }
 
